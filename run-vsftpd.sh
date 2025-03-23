@@ -1,20 +1,15 @@
 #!/bin/bash
 
 # If no env var for FTP_USER has been specified, use 'admin':
-if [ "$FTP_USER" = "**String**" ]; then
-    export FTP_USER='admin'
+if [[ -z "${FTP_USER}" ]]; then
+    echo "FTP_USER is not set"
+	exit 1
 fi
 
 # If no env var has been specified, generate a random password for FTP_USER:
-if [ "$FTP_PASS" = "**Random**" ]; then
-    export FTP_PASS=`cat /dev/urandom | tr -dc A-Z-a-z-0-9 | head -c${1:-16}`
-fi
-
-# Do not log to STDOUT by default:
-if [ "$LOG_STDOUT" = "**Boolean**" ]; then
-    export LOG_STDOUT=''
-else
-    export LOG_STDOUT='Yes.'
+if [[ -z "${FTP_PASS}" ]]; then
+    export FTP_PASS=$(cat /dev/urandom | tr -dc A-Z-a-z-0-9 | head -c${1:-16})
+	exit 1
 fi
 
 # Create home dir and update vsftpd user db:
@@ -42,10 +37,10 @@ echo "pasv_promiscuous=${PASV_PROMISCUOUS}" >> /etc/vsftpd/vsftpd.conf
 echo "port_promiscuous=${PORT_PROMISCUOUS}" >> /etc/vsftpd/vsftpd.conf
 
 # Get log file path
-export LOG_FILE=`grep xferlog_file /etc/vsftpd/vsftpd.conf|cut -d= -f2`
+export LOG_FILE=$(grep xferlog_file /etc/vsftpd/vsftpd.conf|cut -d= -f2)
 
 # stdout server info:
-if [ ! $LOG_STDOUT ]; then
+if [[ -z "$LOG_STDOUT" || "${LOG_STDOUT}" == "false" ]]; then
 cat << EOB
 	*************************************************
 	*                                               *
@@ -62,7 +57,7 @@ cat << EOB
 	· Redirect vsftpd log to STDOUT: No.
 EOB
 else
-    /usr/bin/ln -sf /dev/stdout $LOG_FILE
+    /usr/bin/ln -sf /proc/1/fd/1 "${LOG_FILE}"
 fi
 
 # Run vsftpd:
