@@ -1,4 +1,4 @@
-FROM centos:7
+FROM rockylinux:9
 
 ARG USER_ID=14
 ARG GROUP_ID=50
@@ -12,8 +12,8 @@ LABEL Description="vsftpd Docker image based on Centos 7. Supports passive mode 
 RUN yum -y update && yum clean all
 RUN yum install -y \
 	vsftpd \
-	db4-utils \
-	db4 \
+	libdb-utils \
+	libdb \
 	iproute && yum clean all
 
 RUN usermod -u ${USER_ID} ftp
