@@ -1,7 +1,7 @@
 FROM rockylinux:9
 
-ARG USER_ID=14
-ARG GROUP_ID=50
+ARG USER_ID=1000
+ARG GROUP_ID=1001
 
 MAINTAINER Fer Uria <fauria@gmail.com>
 LABEL Description="vsftpd Docker image based on Centos 7. Supports passive mode and virtual users." \
