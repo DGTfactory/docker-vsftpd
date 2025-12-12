@@ -8,8 +8,7 @@ fi
 
 # If no env var has been specified, generate a random password for FTP_USER:
 if [[ -z "${FTP_PASS}" ]]; then
-    export FTP_PASS=$(cat /dev/urandom | tr -dc A-Z-a-z-0-9 | head -c${1:-16})
-	exit 1
+    export FTP_PASS=$(cat /dev/urandom | tr -dc A-Z-a-z-0-9 | head -c${1:-32})
 fi
 
 # Create home dir and update vsftpd user db:
