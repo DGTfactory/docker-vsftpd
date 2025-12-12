@@ -1,4 +1,4 @@
-FROM rockylinux:9
+FROM rockylinux:9-minimal
 
 ARG USER_ID=1000
 ARG GROUP_ID=1001
@@ -9,12 +9,12 @@ LABEL Description="vsftpd Docker image based on Centos 7. Supports passive mode 
 	Usage="docker run -d -p [HOST PORT NUMBER]:21 -v [HOST FTP HOME]:/home/vsftpd fauria/vsftpd" \
 	Version="1.0"
 
-RUN yum -y update && yum clean all
-RUN yum install -y \
+RUN microdnf -y update && microdnf clean all
+RUN microdnf install -y \
 	vsftpd \
 	libdb-utils \
 	libdb \
-	iproute && yum clean all
+	iproute && microdnf clean all
 
 RUN usermod -u ${USER_ID} ftp
 RUN groupmod -g ${GROUP_ID} ftp
