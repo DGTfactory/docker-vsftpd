@@ -24,6 +24,14 @@ if [[ -z "$PASV_ADDRESS" ]]; then
     export PASV_ADDRESS=$(/sbin/ip route|awk '/default/ { print $3 }')
 fi
 
+CONFBCK=$(cat /etc/vsftpd/vsftpd.conf | grep -e pasv_address -e pasv_max_port -e pasv_min_port -e pasv_addr_resolve -e pasv_enable -e file_open_mode -e local_umask -e xferlog_std_format -e reverse_lookup_enable -e pasv_promiscuous -e port_promiscuous)
+if [ -n "${CONFBCK}" ] ; then
+echo "=== these will be changed in vsftpd.conf ==="
+echo "${CONFBCK}"
+echo "=== these will be changed in vsftpd.conf ==="
+fi
+
+echo "$(cat /etc/vsftpd/vsftpd.conf|grep -v -e pasv_address -e pasv_max_port -e pasv_min_port -e pasv_addr_resolve -e pasv_enable -e file_open_mode -e local_umask -e xferlog_std_format -e reverse_lookup_enable -e pasv_promiscuous -e port_promiscuous)" > /etc/vsftpd/vsftpd.conf
 echo "pasv_address=${PASV_ADDRESS}" >> /etc/vsftpd/vsftpd.conf
 echo "pasv_max_port=${PASV_MAX_PORT}" >> /etc/vsftpd/vsftpd.conf
 echo "pasv_min_port=${PASV_MIN_PORT}" >> /etc/vsftpd/vsftpd.conf
