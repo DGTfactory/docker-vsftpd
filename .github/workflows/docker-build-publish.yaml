@@ -2,10 +2,11 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches:
-      - update-to-rocky9
+    branches: [ main ]
     paths:
       - 'Dockerfile'
+      - 'vsftpd_virtual'
+      - 'run-vsftpd.sh'
       - '.github/workflows/**'
 
 jobs:
