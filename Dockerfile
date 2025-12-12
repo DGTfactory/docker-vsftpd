@@ -1,7 +1,7 @@
-FROM centos:7
+FROM rockylinux:9
 
-ARG USER_ID=14
-ARG GROUP_ID=50
+ARG USER_ID=1000
+ARG GROUP_ID=1001
 
 MAINTAINER Fer Uria <fauria@gmail.com>
 LABEL Description="vsftpd Docker image based on Centos 7. Supports passive mode and virtual users." \
@@ -12,27 +12,27 @@ LABEL Description="vsftpd Docker image based on Centos 7. Supports passive mode 
 RUN yum -y update && yum clean all
 RUN yum install -y \
 	vsftpd \
-	db4-utils \
-	db4 \
+	libdb-utils \
+	libdb \
 	iproute && yum clean all
 
 RUN usermod -u ${USER_ID} ftp
 RUN groupmod -g ${GROUP_ID} ftp
 
-ENV FTP_USER **String**
-ENV FTP_PASS **Random**
-ENV PASV_ADDRESS **IPv4**
-ENV PASV_ADDR_RESOLVE NO
-ENV PASV_ENABLE YES
-ENV PASV_MIN_PORT 21100
-ENV PASV_MAX_PORT 21110
-ENV XFERLOG_STD_FORMAT NO
-ENV LOG_STDOUT **Boolean**
-ENV FILE_OPEN_MODE 0666
-ENV LOCAL_UMASK 077
-ENV REVERSE_LOOKUP_ENABLE YES
-ENV PASV_PROMISCUOUS NO
-ENV PORT_PROMISCUOUS NO
+ENV FTP_USER=
+ENV FTP_PASS=
+ENV PASV_ADDRESS=
+ENV PASV_ADDR_RESOLVE=NO
+ENV PASV_ENABLE=YES
+ENV PASV_MIN_PORT=21100
+ENV PASV_MAX_PORT=21110
+ENV XFERLOG_STD_FORMAT=NO
+ENV LOG_STDOUT=false
+ENV FILE_OPEN_MODE=0666
+ENV LOCAL_UMASK=077
+ENV REVERSE_LOOKUP_ENABLE=YES
+ENV PASV_PROMISCUOUS=NO
+ENV PORT_PROMISCUOUS=NO
 
 COPY vsftpd.conf /etc/vsftpd/
 COPY vsftpd_virtual /etc/pam.d/
