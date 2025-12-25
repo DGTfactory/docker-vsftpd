@@ -3,11 +3,11 @@ FROM rockylinux:9-minimal
 ARG USER_ID=1000
 ARG GROUP_ID=1001
 
-MAINTAINER Fer Uria <fauria@gmail.com>
-LABEL Description="vsftpd Docker image based on Centos 7. Supports passive mode and virtual users." \
+MAINTAINER Tomas Kovacik <kovacik@dgtfactory.com>
+LABEL Description="vsftpd Docker image based on Rocky Linux 9 (minimal). Supports passive mode and virtual users." \
 	License="Apache License 2.0" \
 	Usage="docker run -d -p [HOST PORT NUMBER]:21 -v [HOST FTP HOME]:/home/vsftpd fauria/vsftpd" \
-	Version="1.0"
+	Version="25.12.2025"
 
 RUN microdnf -y update && microdnf clean all
 RUN microdnf install -y \
