@@ -7,7 +7,7 @@ MAINTAINER Tomas Kovacik <kovacik@dgtfactory.com>
 LABEL Description="vsftpd Docker image based on Rocky Linux 9 (minimal). Supports passive mode and virtual users." \
 	License="Apache License 2.0" \
 	Usage="docker run -d -p [HOST PORT NUMBER]:21 -v [HOST FTP HOME]:/home/vsftpd fauria/vsftpd" \
-	Version="25.12.2025"
+	Version="25.01.2026"
 
 RUN microdnf -y update && microdnf clean all
 RUN microdnf install -y \
