@@ -24,14 +24,14 @@ if [[ -z "$PASV_ADDRESS" ]]; then
     export PASV_ADDRESS=$(/sbin/ip route|awk '/default/ { print $3 }')
 fi
 
-CONFBCK=$(cat /etc/vsftpd/vsftpd.conf | grep -e pasv_address -e pasv_max_port -e pasv_min_port -e pasv_addr_resolve -e pasv_enable -e file_open_mode -e local_umask -e xferlog_std_format -e reverse_lookup_enable -e pasv_promiscuous -e port_promiscuous)
+CONFBCK=$(cat /etc/vsftpd/vsftpd.conf | grep -e pasv_address -e pasv_max_port -e pasv_min_port -e pasv_addr_resolve -e pasv_enable -e file_open_mode -e local_umask -e xferlog_std_format -e reverse_lookup_enable -e pasv_promiscuous -e port_promiscuous -e ssl_enable -e allow_anon_ssl -e force_local_data_ssl -e force_local_logins_ssl -e ssl_tlsv1 -e ssl_sslv2 -e ssl_sslv3 -e rsa_cert_file -e rsa_private_key_file -e ssl_ciphers -e implicit_ssl -e listen_port)
 if [ -n "${CONFBCK}" ] ; then
 echo "=== these will be changed in vsftpd.conf ==="
 echo "${CONFBCK}"
 echo "=== these will be changed in vsftpd.conf ==="
 fi
 
-echo "$(cat /etc/vsftpd/vsftpd.conf|grep -v -e pasv_address -e pasv_max_port -e pasv_min_port -e pasv_addr_resolve -e pasv_enable -e file_open_mode -e local_umask -e xferlog_std_format -e reverse_lookup_enable -e pasv_promiscuous -e port_promiscuous)" > /etc/vsftpd/vsftpd.conf
+echo "$(cat /etc/vsftpd/vsftpd.conf|grep -v -e pasv_address -e pasv_max_port -e pasv_min_port -e pasv_addr_resolve -e pasv_enable -e file_open_mode -e local_umask -e xferlog_std_format -e reverse_lookup_enable -e pasv_promiscuous -e port_promiscuous -e ssl_enable -e allow_anon_ssl -e force_local_data_ssl -e force_local_logins_ssl -e ssl_tlsv1 -e ssl_sslv2 -e ssl_sslv3 -e rsa_cert_file -e rsa_private_key_file -e ssl_ciphers -e implicit_ssl -e listen_port)" > /etc/vsftpd/vsftpd.conf
 echo "pasv_address=${PASV_ADDRESS}" >> /etc/vsftpd/vsftpd.conf
 echo "pasv_max_port=${PASV_MAX_PORT}" >> /etc/vsftpd/vsftpd.conf
 echo "pasv_min_port=${PASV_MIN_PORT}" >> /etc/vsftpd/vsftpd.conf
@@ -43,6 +43,34 @@ echo "xferlog_std_format=${XFERLOG_STD_FORMAT}" >> /etc/vsftpd/vsftpd.conf
 echo "reverse_lookup_enable=${REVERSE_LOOKUP_ENABLE}" >> /etc/vsftpd/vsftpd.conf
 echo "pasv_promiscuous=${PASV_PROMISCUOUS}" >> /etc/vsftpd/vsftpd.conf
 echo "port_promiscuous=${PORT_PROMISCUOUS}" >> /etc/vsftpd/vsftpd.conf
+
+# Configure TLS/SSL:
+if [[ "${SSL_ENABLE}" == "YES" ]]; then
+    if [[ ! -f "${SSL_CERT_FILE}" ]]; then
+        echo "ERROR: SSL_ENABLE=YES but certificate file not found: ${SSL_CERT_FILE}"
+        exit 1
+    fi
+    if [[ ! -f "${SSL_KEY_FILE}" ]]; then
+        echo "ERROR: SSL_ENABLE=YES but private key file not found: ${SSL_KEY_FILE}"
+        exit 1
+    fi
+    echo "ssl_enable=YES" >> /etc/vsftpd/vsftpd.conf
+    echo "allow_anon_ssl=NO" >> /etc/vsftpd/vsftpd.conf
+    echo "force_local_data_ssl=${SSL_FORCE_LOCAL_DATA}" >> /etc/vsftpd/vsftpd.conf
+    echo "force_local_logins_ssl=${SSL_FORCE_LOCAL_LOGINS}" >> /etc/vsftpd/vsftpd.conf
+    echo "ssl_tlsv1=YES" >> /etc/vsftpd/vsftpd.conf
+    echo "ssl_sslv2=NO" >> /etc/vsftpd/vsftpd.conf
+    echo "ssl_sslv3=NO" >> /etc/vsftpd/vsftpd.conf
+    echo "ssl_ciphers=HIGH" >> /etc/vsftpd/vsftpd.conf
+    echo "rsa_cert_file=${SSL_CERT_FILE}" >> /etc/vsftpd/vsftpd.conf
+    echo "rsa_private_key_file=${SSL_KEY_FILE}" >> /etc/vsftpd/vsftpd.conf
+    if [[ "${IMPLICIT_SSL}" == "YES" ]]; then
+        echo "implicit_ssl=YES" >> /etc/vsftpd/vsftpd.conf
+        echo "listen_port=990" >> /etc/vsftpd/vsftpd.conf
+    fi
+else
+    echo "ssl_enable=NO" >> /etc/vsftpd/vsftpd.conf
+fi
 
 # Get log file path
 export LOG_FILE=$(grep xferlog_file /etc/vsftpd/vsftpd.conf|cut -d= -f2)
@@ -63,6 +91,7 @@ cat << EOB
 	· FTP Password: $FTP_PASS
 	· Log file: $LOG_FILE
 	· Redirect vsftpd log to STDOUT: No.
+	· TLS/SSL enabled: $SSL_ENABLE
 EOB
 else
     /usr/bin/ln -sf /proc/1/fd/1 "${LOG_FILE}"

@@ -37,6 +37,12 @@ ENV PASV_PROMISCUOUS=NO
 ENV PORT_PROMISCUOUS=NO
 ENV LOG_ROTATE_ENABLE=true
 ENV LOG_ROTATE_COUNT=7
+ENV SSL_ENABLE=NO
+ENV SSL_CERT_FILE=/etc/vsftpd/certs/vsftpd.pem
+ENV SSL_KEY_FILE=/etc/vsftpd/certs/vsftpd.key
+ENV IMPLICIT_SSL=NO
+ENV SSL_FORCE_LOCAL_DATA=NO
+ENV SSL_FORCE_LOCAL_LOGINS=NO
 
 COPY vsftpd.conf /etc/vsftpd/
 COPY vsftpd_virtual /etc/pam.d/
@@ -48,7 +54,8 @@ RUN chown -R ftp:ftp /home/vsftpd/
 
 VOLUME /home/vsftpd
 VOLUME /var/log/vsftpd
+VOLUME /etc/vsftpd/certs
 
-EXPOSE 20 21
+EXPOSE 20 21 990
 
 CMD ["/usr/sbin/run-vsftpd.sh"]

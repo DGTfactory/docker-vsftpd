@@ -9,10 +9,22 @@ services:
     restart: always
     environment:
       - FTP_USER=${USER}
+      # Uncomment and configure the lines below to enable TLS/SSL (explicit FTPS on port 21):
+      # - SSL_ENABLE=YES
+      # - SSL_CERT_FILE=/etc/vsftpd/certs/vsftpd.pem
+      # - SSL_KEY_FILE=/etc/vsftpd/certs/vsftpd.key
+      # Set IMPLICIT_SSL=YES to use implicit FTPS (port 990) instead of explicit FTPS:
+      # - IMPLICIT_SSL=NO
     ports:
       - 0.0.0.0:20:20
       - 0.0.0.0:21:21
       - 0.0.0.0:21100-21110:21100-21110
+      # Uncomment for implicit FTPS (port 990):
+      # - 0.0.0.0:990:990
     volumes:
       - ./home:/home/vsftpd
       - ./logs:/var/log/vsftpd
+      # Mount a directory containing vsftpd.pem and vsftpd.key for TLS/SSL support.
+      # Certificates from Let's Encrypt are picked up automatically on renewal
+      # without restarting the container (vsftpd re-reads cert files per connection).
+      # - /path/to/certs:/etc/vsftpd/certs:ro

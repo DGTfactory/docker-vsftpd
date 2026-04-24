@@ -132,10 +132,52 @@ This image uses environment variables to allow the configuration of some paramet
 
 ----
 
+* Variable name: `SSL_ENABLE`
+* Default value: NO
+* Accepted values: <NO|YES>
+* Description: Set to YES to enable TLS/SSL (explicit FTPS on port 21). The certificate and private key files must be present at the paths given by `SSL_CERT_FILE` and `SSL_KEY_FILE`. By default clients are **not** forced to use TLS — set `SSL_FORCE_LOCAL_DATA` and `SSL_FORCE_LOCAL_LOGINS` to YES to require it.
+
+----
+
+* Variable name: `SSL_CERT_FILE`
+* Default value: /etc/vsftpd/certs/vsftpd.pem
+* Accepted values: Absolute path to a PEM-encoded certificate file inside the container.
+* Description: Path to the TLS certificate file. Mount a host directory (or a named volume) at `/etc/vsftpd/certs` and place the certificate there. When using Let's Encrypt, this is typically the `fullchain.pem` file. **No container restart is required after certificate renewal** — vsftpd re-reads the certificate from disk for every new client connection, so renewed certificates are picked up automatically.
+
+----
+
+* Variable name: `SSL_KEY_FILE`
+* Default value: /etc/vsftpd/certs/vsftpd.key
+* Accepted values: Absolute path to a PEM-encoded private key file inside the container.
+* Description: Path to the TLS private key file. When using Let's Encrypt, this is typically the `privkey.pem` file.
+
+----
+
+* Variable name: `SSL_FORCE_LOCAL_DATA`
+* Default value: NO
+* Accepted values: <NO|YES>
+* Description: Set to YES to require TLS for all data connections when `SSL_ENABLE=YES`. When NO, clients may connect to the data channel without TLS.
+
+----
+
+* Variable name: `SSL_FORCE_LOCAL_LOGINS`
+* Default value: NO
+* Accepted values: <NO|YES>
+* Description: Set to YES to require TLS for all login (control) connections when `SSL_ENABLE=YES`. When NO, clients may authenticate without TLS.
+
+----
+
+* Variable name: `IMPLICIT_SSL`
+* Default value: NO
+* Accepted values: <NO|YES>
+* Description: Set to YES to use implicit FTPS (port 990) instead of explicit FTPS (port 21). Requires `SSL_ENABLE=YES`. Remember to publish port 990 with `-p 990:990`.
+
+----
+
 Exposed ports and volumes
 ----
 
-The image exposes ports `20` and `21`. Also, exports two volumes: `/home/vsftpd`, which contains users home directories, and `/var/log/vsftpd`, used to store logs.
+The image exposes ports `20`, `21`, and `990`. Also, exports three volumes: `/home/vsftpd`, which contains users home directories; `/var/log/vsftpd`, used to store logs; and `/etc/vsftpd/certs`, the mount point for TLS/SSL certificate files.
 
 When sharing a homes directory between the host and the container (`/home/vsftpd`) the owner user id and group id should be 14 and 50 respectively. This corresponds to ftp user and ftp group on the container, but may match something else on the host.
 
@@ -175,3 +217,20 @@ echo -e "myuser\nmypass" >> /etc/vsftpd/virtual_users.txt
 exit
 docker restart vsftpd
 ```
+
+5) Create a **production container with TLS/SSL** (explicit FTPS) using Let's Encrypt certificates:
+
+```bash
+docker run -d -v /my/data/directory:/home/vsftpd \
+-v /etc/letsencrypt/live/example.com:/etc/vsftpd/certs:ro \
+-p 20:20 -p 21:21 -p 21100-21110:21100-21110 \
+-e FTP_USER=myuser -e FTP_PASS=mypass \
+-e PASV_ADDRESS=example.com -e PASV_MIN_PORT=21100 -e PASV_MAX_PORT=21110 \
+-e SSL_ENABLE=YES \
+-e SSL_CERT_FILE=/etc/vsftpd/certs/fullchain.pem \
+-e SSL_KEY_FILE=/etc/vsftpd/certs/privkey.pem \
+--name vsftpd --restart=always fauria/vsftpd
+```
+
+> **Note on Let's Encrypt certificate renewal:** vsftpd re-reads the certificate and key files from disk for every new client connection. This means renewed certificates are picked up automatically without restarting the container or vsftpd process.
+
