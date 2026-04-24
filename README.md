@@ -135,7 +135,7 @@ This image uses environment variables to allow the configuration of some paramet
 * Variable name: `SSL_ENABLE`
 * Default value: NO
 * Accepted values: <NO|YES>
-* Description: Set to YES to enable TLS/SSL (explicit FTPS on port 21). When enabled, both control and data connections are required to use TLS. The certificate and private key files must be present at the paths given by `SSL_CERT_FILE` and `SSL_KEY_FILE`.
+* Description: Set to YES to enable TLS/SSL (explicit FTPS on port 21). The certificate and private key files must be present at the paths given by `SSL_CERT_FILE` and `SSL_KEY_FILE`. By default clients are **not** forced to use TLS — set `SSL_FORCE_LOCAL_DATA` and `SSL_FORCE_LOCAL_LOGINS` to YES to require it.
 
 ----
 
@@ -150,6 +150,20 @@ This image uses environment variables to allow the configuration of some paramet
 * Default value: /etc/vsftpd/certs/vsftpd.key
 * Accepted values: Absolute path to a PEM-encoded private key file inside the container.
 * Description: Path to the TLS private key file. When using Let's Encrypt, this is typically the `privkey.pem` file.
+
+----
+
+* Variable name: `SSL_FORCE_LOCAL_DATA`
+* Default value: NO
+* Accepted values: <NO|YES>
+* Description: Set to YES to require TLS for all data connections when `SSL_ENABLE=YES`. When NO, clients may connect to the data channel without TLS.
+
+----
+
+* Variable name: `SSL_FORCE_LOCAL_LOGINS`
+* Default value: NO
+* Accepted values: <NO|YES>
+* Description: Set to YES to require TLS for all login (control) connections when `SSL_ENABLE=YES`. When NO, clients may authenticate without TLS.
 
 ----
 

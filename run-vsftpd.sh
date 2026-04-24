@@ -56,8 +56,8 @@ if [[ "${SSL_ENABLE}" == "YES" ]]; then
     fi
     echo "ssl_enable=YES" >> /etc/vsftpd/vsftpd.conf
     echo "allow_anon_ssl=NO" >> /etc/vsftpd/vsftpd.conf
-    echo "force_local_data_ssl=YES" >> /etc/vsftpd/vsftpd.conf
-    echo "force_local_logins_ssl=YES" >> /etc/vsftpd/vsftpd.conf
+    echo "force_local_data_ssl=${SSL_FORCE_LOCAL_DATA}" >> /etc/vsftpd/vsftpd.conf
+    echo "force_local_logins_ssl=${SSL_FORCE_LOCAL_LOGINS}" >> /etc/vsftpd/vsftpd.conf
     echo "ssl_tlsv1=YES" >> /etc/vsftpd/vsftpd.conf
     echo "ssl_sslv2=NO" >> /etc/vsftpd/vsftpd.conf
     echo "ssl_sslv3=NO" >> /etc/vsftpd/vsftpd.conf

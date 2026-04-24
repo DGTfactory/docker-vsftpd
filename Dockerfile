@@ -41,6 +41,8 @@ ENV SSL_ENABLE=NO
 ENV SSL_CERT_FILE=/etc/vsftpd/certs/vsftpd.pem
 ENV SSL_KEY_FILE=/etc/vsftpd/certs/vsftpd.key
 ENV IMPLICIT_SSL=NO
+ENV SSL_FORCE_LOCAL_DATA=NO
+ENV SSL_FORCE_LOCAL_LOGINS=NO
 
 COPY vsftpd.conf /etc/vsftpd/
 COPY vsftpd_virtual /etc/pam.d/
