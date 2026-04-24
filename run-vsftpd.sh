@@ -21,8 +21,9 @@ rm /etc/vsftpd/virtual_users.txt
 
 # Set passive mode parameters:
 if [[ -z "$PASV_ADDRESS" ]]; then
-    export PASV_ADDRESS=$(/sbin/ip route get 1 | awk 'NR==1{for(i=1;i<=NF;i++) if($i=="src") {print $(i+1); break}}')
-    echo "WARNING: PASV_ADDRESS not set. Auto-detected container IP: ${PASV_ADDRESS}. For external FTP access, set PASV_ADDRESS to the Docker host's public IP or hostname."
+    export PASV_ADDRESS=$(/sbin/ip route get 1 | grep -oP '(?<=src )[^ ]+')
+    echo "WARNING: PASV_ADDRESS not set. Auto-detected container IP: ${PASV_ADDRESS}." >&2
+    echo "WARNING: For external FTP access, set PASV_ADDRESS to the Docker host's public IP or hostname." >&2
 fi
 
 CONFBCK=$(cat /etc/vsftpd/vsftpd.conf | grep -e pasv_address -e pasv_max_port -e pasv_min_port -e pasv_addr_resolve -e pasv_enable -e file_open_mode -e local_umask -e xferlog_std_format -e reverse_lookup_enable -e pasv_promiscuous -e port_promiscuous -e ssl_enable -e allow_anon_ssl -e force_local_data_ssl -e force_local_logins_ssl -e ssl_tlsv1 -e ssl_sslv2 -e ssl_sslv3 -e rsa_cert_file -e rsa_private_key_file -e ssl_ciphers -e implicit_ssl -e listen_port)
