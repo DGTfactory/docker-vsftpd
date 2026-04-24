@@ -14,7 +14,9 @@ RUN microdnf install -y \
 	vsftpd \
 	libdb-utils \
 	libdb \
-	iproute && microdnf clean all
+	iproute \
+	logrotate \
+	cronie && microdnf clean all
 
 RUN usermod -u ${USER_ID} ftp
 RUN groupmod -g ${GROUP_ID} ftp
@@ -33,6 +35,8 @@ ENV LOCAL_UMASK=077
 ENV REVERSE_LOOKUP_ENABLE=YES
 ENV PASV_PROMISCUOUS=NO
 ENV PORT_PROMISCUOUS=NO
+ENV LOG_ROTATE_ENABLE=true
+ENV LOG_ROTATE_COUNT=7
 
 COPY vsftpd.conf /etc/vsftpd/
 COPY vsftpd_virtual /etc/pam.d/

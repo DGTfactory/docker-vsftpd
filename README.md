@@ -118,6 +118,20 @@ This image uses environment variables to allow the configuration of some paramet
 
 ----
 
+* Variable name: `LOG_ROTATE_ENABLE`
+* Default value: true
+* Accepted values: <true|false>
+* Description: Set to true to enable automatic log rotation via logrotate. A cron job will rotate `/var/log/vsftpd/vsftpd.log` daily.
+
+----
+
+* Variable name: `LOG_ROTATE_COUNT`
+* Default value: 7
+* Accepted values: Any positive integer.
+* Description: Number of rotated log files to keep before they are removed. Only used when `LOG_ROTATE_ENABLE` is true.
+
+----
+
 Exposed ports and volumes
 ----
 
