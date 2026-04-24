@@ -68,5 +68,25 @@ else
     /usr/bin/ln -sf /proc/1/fd/1 "${LOG_FILE}"
 fi
 
+# Set up log rotation:
+if [[ "${LOG_ROTATE_ENABLE}" == "true" ]]; then
+    cat > /etc/logrotate.d/vsftpd << EOF
+/var/log/vsftpd/vsftpd.log {
+    daily
+    rotate ${LOG_ROTATE_COUNT}
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    dateext
+}
+EOF
+    chmod 644 /etc/logrotate.d/vsftpd
+    echo "0 0 * * * root /usr/sbin/logrotate /etc/logrotate.conf" > /etc/cron.d/vsftpd-logrotate
+    chmod 644 /etc/cron.d/vsftpd-logrotate
+    /usr/sbin/crond
+fi
+
 # Run vsftpd:
 &>/dev/null /usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
