@@ -75,8 +75,24 @@ fi
 # Get log file path
 export LOG_FILE=$(grep xferlog_file /etc/vsftpd/vsftpd.conf|cut -d= -f2)
 
-# stdout server info:
-if [[ -z "$LOG_STDOUT" || "${LOG_STDOUT}" == "false" ]]; then
+# stdout server info: LOG_STDOUT is off when empty / 0 / no / false
+case "${LOG_STDOUT,,}" in
+    0|no|false|"")
+        LOG_STDOUT_FLAG=off
+        ;;
+    *)
+        LOG_STDOUT_FLAG=on
+        ;;
+esac
+
+if [[ "$LOG_STDOUT_FLAG" == "off" ]]; then
+    # A previous LOG_STDOUT=on run may have left ${LOG_FILE} as a symlink to
+    # stdout (typically persists via a bind-mounted log dir). Remove it so
+    # vsftpd writes a real log file again.
+    if [[ -L "${LOG_FILE}" ]]; then
+        rm -f "${LOG_FILE}"
+        echo "Removed stale STDOUT symlink at ${LOG_FILE}; regular log file restored."
+    fi
 cat << EOB
 	*************************************************
 	*                                               *
