@@ -17,6 +17,23 @@ RUN microdnf install -y \
 	iproute \
 	logrotate \
 	cronie && microdnf clean all
+# eMudhra compromise (JDK-8395690 / CVE-2026-114820): blocklist all emSign roots
+RUN set -e; CA_PATTERN='emsign'; \
+    awk -v pat="$CA_PATTERN" ' \
+      /^# / { name = substr($0, 3); keep = (tolower(name) ~ pat) } \
+      keep && /BEGIN CERTIFICATE/ { gsub(/[^A-Za-z0-9._-]+/, "_", name); out = "/etc/pki/ca-trust/source/blocklist/" name ".pem" } \
+      out { print > out } \
+      /END CERTIFICATE/ { if (out) close(out); out = "" }' \
+      /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem \
+      /etc/pki/ca-trust/extracted/pem/email-ca-bundle.pem \
+      /etc/pki/ca-trust/extracted/pem/objsign-ca-bundle.pem; \
+    update-ca-trust extract; \
+    if command -v keytool >/dev/null; then \
+      keytool -list -cacerts -storepass changeit \
+        | sed -n -E 's/, [A-Z][a-z]{2} [0-9]{1,2}, [0-9]{4}, trustedCertEntry, *$//p' \
+        | grep -iE "$CA_PATTERN" \
+        | while IFS= read -r a; do keytool -delete -cacerts -storepass changeit -alias "$a"; done; \
+    fi
 
 RUN usermod -u ${USER_ID} ftp
 RUN groupmod -g ${GROUP_ID} ftp
